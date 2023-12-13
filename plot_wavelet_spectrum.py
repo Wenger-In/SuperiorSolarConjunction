@@ -57,4 +57,4 @@ for i in range(physical_quantities.shape[1]):
     plot_fft(time, signal, title_fft)
 
     # 绘制小波变换谱
-    plot_wavelet_transform(time, signal, title_wavelet)
+    # plot_wavelet_transform(time, signal, title_wavelet)
