@@ -12,8 +12,8 @@ if file_type == 0:
 elif file_type == 1:
     file_dir = 'E:/Research/Data/Tianwen/m1727x/km/amp_fre_phase/TW/'
     file_name = 'TWkmfpda.dat'
-    var_list = ['Residual Frequency [Hz]', 'Residual Phase [rad]', 'Relative Time Delay [ns]',
-                 'Residual Frequency [Hz]', 'Residual Phase [rad]', 'Relative Time Delay [ns]',
+    var_list = ['Residual Frequency-1 [Hz]', 'Residual Phase-1 [rad]', 'Relative Time Delay-1 [ns]',
+                 'Residual Frequency-2 [Hz]', 'Residual Phase-2 [rad]', 'Relative Time Delay-2 [ns]',
                  'Signal-to-Noise Ratio [dB]', 'Signal Strength [dB]']
 if file_type == 2:
     file_dir = 'E:/Research/Data/Tianwen/m1727x/km/amp_fre_phase/TW/'
@@ -72,8 +72,9 @@ for i in range(var.shape[1]):
 
     # calculate CWT
     wavename = 'cmorl1.5-1.0'
-    num_freq = 100
-    wave_freq = np.logspace(-3, np.log10(1/(2*dt)), num_freq)
+    num_freq = 50
+    # wave_freq = np.logspace(-3, np.log10(1/(2*dt)), num_freq)
+    wave_freq = np.logspace(-1, 0.8*np.log10(1/(2*dt)), num_freq)
     scales = 1 / wave_freq
     cwtmatr, _ = pywt.cwt(signal, scales, wavename, 1.0 / dt)
 
