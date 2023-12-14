@@ -72,7 +72,7 @@ for i in range(var.shape[1]):
 
     # calculate CWT
     wavename = 'cmorl1.5-1.0'
-    num_freq = 30
+    num_freq = 100
     wave_freq = np.logspace(-3, np.log10(1/(2*dt)), num_freq)
     scales = 1 / wave_freq
     cwtmatr, _ = pywt.cwt(signal, scales, wavename, 1.0 / dt)
