@@ -24,6 +24,10 @@ file_path = file_dir + file_name
 data = np.loadtxt(file_path)
 time = data[:, 0]
 time = time - time [0]
+if file_type == 0:
+    time = np.linspace(0,int(file_name[17])*len(time),len(time))
+elif file_type == 2:
+    time = np.linspace(0,int(file_name[9])*len(time),len(time))
 var = data[:, 1:]
 if file_type == 1:
     var = var[:, 1:]
@@ -59,14 +63,26 @@ def plot_all(time, signal, fft_freq, fft_values, wave_freq, cwtmatr, title):
     fig.suptitle(title)
     plt.show()
 
+def eliminate_weekly_ambiguity(phase_sequence):
+    for i in range(1, len(phase_sequence)):
+        if phase_sequence[i] > phase_sequence[i - 1]:
+            phase_sequence[i:] -= 2 * np.pi
+    return phase_sequence
+
 for i in range(var.shape[1]):
     signal = var[:, i]
     var_title = var_list[i] if i < len(var_list) else f'variable {i + 1}'
     title = file_path[24:] + ' --- ' + var_title
+    
+    # eliminate ambiguity for phase sequence
+    if file_type == 0 or file_type == 1:
+        if i == 1 or i == 4:
+            signal = eliminate_weekly_ambiguity(signal)
 
     # calculate FTT
     n = len(time)
     dt = time[1] - time[0]
+    print(dt)
     fft_freq = np.fft.fftfreq(n, dt)
     fft_values = fft(signal)
 
