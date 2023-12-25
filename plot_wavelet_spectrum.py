@@ -112,11 +112,12 @@ for i in range(var.shape[1]):
     # calculate FTT
     n = len(time)
     dt = time[1] - time[0]
+    fs = 1/dt
     print(dt)
     fft_freq = np.fft.fftfreq(n, dt)
     fft_amp = np.fft.fft(signal)
     fft_amp = fft_amp[fft_freq > 0]
-    fft_ps = np.abs(fft_amp)**2 / n
+    fft_ps = np.abs(fft_amp)**2 / (fs*n)
 
     # calculate CWT
     wavename = 'cmorl1.5-1.0'
@@ -126,7 +127,7 @@ for i in range(var.shape[1]):
         wave_freq = np.logspace(-1, 0.8*np.log10(1/(2*dt)), num_freq)
     scales = 1 / wave_freq
     cwtmatr, cwt_freq = pywt.cwt(signal, scales, wavename, 1.0 / dt)
-    cwt_ps = np.abs(cwtmatr)**2 / n
+    cwt_ps = np.abs(cwtmatr)**2 / (fs*n)
 
     # plot figure
     plot_all(time, signal, fft_freq[fft_freq > 0], fft_ps, cwt_freq, cwt_ps, title, var_name, unit_name)
