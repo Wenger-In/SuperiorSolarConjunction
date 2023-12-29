@@ -3,9 +3,10 @@ from numpy.polynomial import Polynomial
 import matplotlib.pyplot as plt
 import pywt
 from matplotlib.colors import LogNorm
+from scipy.optimize import curve_fit
 
 # import data
-file_type = 0
+file_type = 3
 if file_type == 0:
     file_dir = 'E:/Research/Data/Tianwen/m1a04x_renew/'
     file_name = 'BdBdchan3_1frephase2s.dat'
@@ -25,14 +26,14 @@ elif file_type == 2:
     unit_list = ['Hz', 'Hz']
 elif file_type == 3:
     file_dir = 'E:/Research/Data/Tianwen/m1a04x_PLL/'
-    file_name = 'BdBdsignum113pll_Ts.dat'
+    file_name = 'HhHhsignum113pll_Ts.dat'
     var_list = ['Residual Frequency-1', 'Residual Phase-1',
                  'Residual Frequency-2', 'Residual Phase-2']
     unit_list = ['Hz', 'Hz']
 
 file_path = file_dir + file_name
 data = np.loadtxt(file_path)
-# data = data[8000:,:] # for HhHhsignum113pll_Ts.dat
+data = data[8000:,:] # for HhHhsignum113pll_Ts.dat
 time = data[:, 0]
 var = data[:, 1:]
 if file_type == 2:
@@ -44,8 +45,84 @@ if file_type == 0:
 if file_type == 1:
     var = var[:, 1:]
 
-def plot_all(time, signal, fft_freq, fft_ps, cwt_freq, cwt_ps, title, var_name, unit_name):
-    fig, axes = plt.subplots(2, 2, figsize=(12, 6), gridspec_kw={'height_ratios': [3, 5], 'width_ratios': [5, 4]})
+def eliminate_weekly_ambiguity(phase_sequence):
+    for i in range(1, len(phase_sequence)):
+        if phase_sequence[i] > phase_sequence[i - 1]:
+            phase_sequence[i:] -= 2 * np.pi
+    return phase_sequence
+
+def linear_detrend(phase_sequence, time, title):
+    coefficients = np.polyfit(time, phase_sequence, 1)
+    fit_sequence = np.polyval(coefficients, time)
+    detrended_sequence = phase_sequence - fit_sequence
+    plt.figure()
+    plt.plot(time,phase_sequence,label='phase')
+    plt.plot(time,fit_sequence,label='fit')
+    plt.legend()
+    plt.title(title)
+    plt.show()
+    return detrended_sequence
+
+def quadratic_detrend(frequency_sequence,time,title):
+    def quadratic_fit(x, a, b, c):
+        return a * x**2 + b * x + c
+    indices = np.arange(len(frequency_sequence))
+    initial_guess = [0.0, 0.0, 0.0]
+    params, _ = curve_fit(quadratic_fit, indices, frequency_sequence, p0=initial_guess)
+    detrended_sequence = frequency_sequence - quadratic_fit(indices, *params)    
+    fig, axs = plt.subplots(1, 2, figsize=(10, 4), sharex=True)
+    axs[0].plot(time, frequency_sequence)
+    axs[0].plot(time, quadratic_fit(indices, *params))
+    axs[0].set_ylabel('Frequency [Hz]')
+    axs[0].legend()
+    axs[1].plot(time, detrended_sequence)
+    axs[1].set_xlabel('Time [s]')
+    axs[1].set_ylabel('Detrended Frequency [Hz]')
+    plt.suptitle(title)
+    plt.show()
+    return detrended_sequence
+
+for i in range(var.shape[1]):
+    signal = var[:, i]
+    var_name = var_list[i] if i < len(var_list) else f'variable {i + 1}'
+    unit_name =  unit_list[i] if i < len(unit_list) else ''
+    title = file_path[24:] + ' --- ' + var_name
+    
+    # eliminate ambiguity for phase sequence
+    if file_type == 0 and i == 1:
+        signal = eliminate_weekly_ambiguity(signal)
+    
+    # linear detrend for phase sequence
+    if file_type == 3 and (i == 1 or i == 3):
+        signal = linear_detrend(signal, time, title)
+    
+    # # quadratic detrend for frequency sequence (only for short data segments)
+    # if file_type == 3 and (i == 0 or i == 2):
+    #     signal = quadratic_detrend(signal, time, title)
+
+    # calculate FTT
+    n = len(time)
+    dt = time[1] - time[0]
+    fs = 1/dt
+    print(dt)
+    fft_freq = np.fft.fftfreq(n, dt)
+    fft_amp = np.fft.fft(signal)
+    fft_amp = fft_amp[fft_freq > 0]
+    fft_freq = fft_freq[fft_freq > 0]
+    fft_ps = np.abs(fft_amp)**2 / (n/fs)
+
+    # calculate CWT
+    wavename = 'cmorl1.5-1.0'
+    num_freq = 50
+    wave_freq = np.logspace(-4, np.log10(1/(2*dt)), num_freq)
+    if file_type == 1:
+        wave_freq = np.logspace(-1, 0.8*np.log10(1/(2*dt)), num_freq)
+    scales = 1 / wave_freq
+    cwtmatr, cwt_freq = pywt.cwt(signal, scales, wavename, 1.0 / dt)
+    cwt_ps = np.abs(cwtmatr)**2 / (n/fs)
+
+    # plot figure
+    fig, axes = plt.subplots(2, 2, figsize=(16, 8), gridspec_kw={'height_ratios': [3, 5], 'width_ratios': [5, 4]})
 
     # time series
     axes[0, 0].plot(time, signal)
@@ -75,59 +152,5 @@ def plot_all(time, signal, fft_freq, fft_ps, cwt_freq, cwt_ps, title, var_name, 
     axes[1, 1].set_title('Fourier Transform')
 
     fig.suptitle(title)
+    # plt.savefig(f"E:/Research/Work/tianwen_IPS/{file_name[0:2]}_{var_name}.png")
     plt.show()
-
-def eliminate_weekly_ambiguity(phase_sequence):
-    for i in range(1, len(phase_sequence)):
-        if phase_sequence[i] > phase_sequence[i - 1]:
-            phase_sequence[i:] -= 2 * np.pi
-    return phase_sequence
-
-def linear_detrend(phase_sequence, time, title):
-    coefficients = np.polyfit(time, phase_sequence, 1)
-    fit_sequence = np.polyval(coefficients, time)
-    detrended_sequence = phase_sequence - fit_sequence
-    plt.figure()
-    plt.plot(time,phase_sequence,label='phase')
-    plt.plot(time,fit_sequence,label='fit')
-    plt.legend()
-    plt.title(title)
-    plt.show()
-    return detrended_sequence
-
-for i in range(var.shape[1]):
-    signal = var[:, i]
-    var_name = var_list[i] if i < len(var_list) else f'variable {i + 1}'
-    unit_name =  unit_list[i] if i < len(unit_list) else ''
-    title = file_path[24:] + ' --- ' + var_name
-    
-    # eliminate ambiguity for phase sequence
-    if file_type == 0 and i == 1:
-        signal = eliminate_weekly_ambiguity(signal)
-    
-    # linear detrend for phase sequence
-    if file_type == 3 and (i == 0 or i == 3):
-        signal = linear_detrend(signal, time, title)
-
-    # calculate FTT
-    n = len(time)
-    dt = time[1] - time[0]
-    fs = 1/dt
-    print(dt)
-    fft_freq = np.fft.fftfreq(n, dt)
-    fft_amp = np.fft.fft(signal)
-    fft_amp = fft_amp[fft_freq > 0]
-    fft_ps = np.abs(fft_amp)**2 / (fs*n)
-
-    # calculate CWT
-    wavename = 'cmorl1.5-1.0'
-    num_freq = 50
-    wave_freq = np.logspace(-4, np.log10(1/(2*dt)), num_freq)
-    if file_type == 1:
-        wave_freq = np.logspace(-1, 0.8*np.log10(1/(2*dt)), num_freq)
-    scales = 1 / wave_freq
-    cwtmatr, cwt_freq = pywt.cwt(signal, scales, wavename, 1.0 / dt)
-    cwt_ps = np.abs(cwtmatr)**2 / (n/fs)
-
-    # plot figure
-    plot_all(time, signal, fft_freq[fft_freq > 0], fft_ps, cwt_freq, cwt_ps, title, var_name, unit_name)
