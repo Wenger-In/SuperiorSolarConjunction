@@ -3,7 +3,6 @@ from numpy.polynomial import Polynomial
 import matplotlib.pyplot as plt
 import pywt
 from matplotlib.colors import LogNorm
-from scipy.optimize import curve_fit
 
 # import data
 file_type = 3
@@ -26,14 +25,14 @@ elif file_type == 2:
     unit_list = ['Hz', 'Hz']
 elif file_type == 3:
     file_dir = 'E:/Research/Data/Tianwen/m1a04x_PLL/'
-    file_name = 'HhHhsignum113pll_Ts.dat'
+    file_name = 'BdBdsignum113pll_Ts.dat'
     var_list = ['Residual Frequency-1', 'Residual Phase-1',
                  'Residual Frequency-2', 'Residual Phase-2']
-    unit_list = ['Hz', 'Hz']
+    unit_list = ['Hz', 'rad', 'Hz', 'rad']
 
 file_path = file_dir + file_name
 data = np.loadtxt(file_path)
-data = data[8000:,:] # for HhHhsignum113pll_Ts.dat
+# data = data[8000:,:] # for HhHhsignum113pll_Ts.dat
 time = data[:, 0]
 var = data[:, 1:]
 if file_type == 2:
@@ -64,15 +63,12 @@ def linear_detrend(phase_sequence, time, title):
     return detrended_sequence
 
 def quadratic_detrend(frequency_sequence,time,title):
-    def quadratic_fit(x, a, b, c):
-        return a * x**2 + b * x + c
-    indices = np.arange(len(frequency_sequence))
-    initial_guess = [0.0, 0.0, 0.0]
-    params, _ = curve_fit(quadratic_fit, indices, frequency_sequence, p0=initial_guess)
-    detrended_sequence = frequency_sequence - quadratic_fit(indices, *params)    
+    coefficients = np.polyfit(time, frequency_sequence, 2)
+    fit_sequence = np.polyval(coefficients, time)
+    detrended_sequence = frequency_sequence - fit_sequence
     fig, axs = plt.subplots(1, 2, figsize=(10, 4), sharex=True)
     axs[0].plot(time, frequency_sequence)
-    axs[0].plot(time, quadratic_fit(indices, *params))
+    axs[0].plot(time, fit_sequence)
     axs[0].set_ylabel('Frequency [Hz]')
     axs[0].legend()
     axs[1].plot(time, detrended_sequence)
@@ -96,9 +92,9 @@ for i in range(var.shape[1]):
     if file_type == 3 and (i == 1 or i == 3):
         signal = linear_detrend(signal, time, title)
     
-    # # quadratic detrend for frequency sequence (only for short data segments)
-    # if file_type == 3 and (i == 0 or i == 2):
-    #     signal = quadratic_detrend(signal, time, title)
+    # quadratic detrend for frequency sequence
+    if file_type == 3 and (i == 0 or i == 2):
+        signal = quadratic_detrend(signal, time, title)
 
     # calculate FTT
     n = len(time)
@@ -112,14 +108,14 @@ for i in range(var.shape[1]):
     fft_ps = np.abs(fft_amp)**2 / (n/fs)
 
     # calculate CWT
-    wavename = 'cmorl1.5-1.0'
-    num_freq = 50
-    wave_freq = np.logspace(-4, np.log10(1/(2*dt)), num_freq)
-    if file_type == 1:
-        wave_freq = np.logspace(-1, 0.8*np.log10(1/(2*dt)), num_freq)
-    scales = 1 / wave_freq
-    cwtmatr, cwt_freq = pywt.cwt(signal, scales, wavename, 1.0 / dt)
-    cwt_ps = np.abs(cwtmatr)**2 / (n/fs)
+    # wavename = 'cmorl1.5-1.0'
+    # num_freq = 50
+    # wave_freq = np.logspace(-4, np.log10(1/(2*dt)), num_freq)
+    # if file_type == 1:
+    #     wave_freq = np.logspace(-1, 0.8*np.log10(1/(2*dt)), num_freq)
+    # scales = 1 / wave_freq
+    # cwtmatr, cwt_freq = pywt.cwt(signal, scales, wavename, 1.0 / dt)
+    # cwt_ps = np.abs(cwtmatr)**2 / (n/fs)
 
     # plot figure
     fig, axes = plt.subplots(2, 2, figsize=(16, 8), gridspec_kw={'height_ratios': [3, 5], 'width_ratios': [5, 4]})
@@ -132,12 +128,12 @@ for i in range(var.shape[1]):
     axes[0, 0].tick_params(direction='in')
     axes[0, 0].set_title('Time Series')
 
-    # wavelet transform
-    pcwt = axes[1, 0].pcolormesh(time, cwt_freq, cwt_ps, cmap='jet', norm=LogNorm())
-    axes[1, 0].set_title('Wavelet Transform')
-    axes[1, 0].set_ylabel('Frequency [Hz]')
-    axes[1, 0].set_yscale('log')
-    cbar = plt.colorbar(pcwt, ax=axes[1, 0], orientation='horizontal', pad=0.1)
+    # # wavelet transform
+    # pcwt = axes[1, 0].pcolormesh(time, cwt_freq, cwt_ps, cmap='jet', norm=LogNorm())
+    # axes[1, 0].set_title('Wavelet Transform')
+    # axes[1, 0].set_ylabel('Frequency [Hz]')
+    # axes[1, 0].set_yscale('log')
+    # cbar = plt.colorbar(pcwt, ax=axes[1, 0], orientation='horizontal', pad=0.1)
     
     # no right-upper subplot
     axes[0, 1].axis('off')
