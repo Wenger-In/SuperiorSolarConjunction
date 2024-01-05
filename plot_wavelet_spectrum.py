@@ -5,7 +5,7 @@ import pywt
 from matplotlib.colors import LogNorm
 
 # import data
-file_type = 3
+file_type = 4
 if file_type == 0:
     file_dir = 'E:/Research/Data/Tianwen/m1a04x_renew/'
     file_name = 'BdBdchan3_1frephase2s.dat'
@@ -29,12 +29,18 @@ elif file_type == 3:
     var_list = ['Residual Frequency-1', 'Residual Phase-1',
                  'Residual Frequency-2', 'Residual Phase-2']
     unit_list = ['Hz', 'rad', 'Hz', 'rad']
+elif file_type == 4:
+    file_dir = 'E:/Research/Data/Tianwen/m1a04x_renew/'
+    file_name = 'BdBdchan3_1frephase1s.dat'
+    var_list = ['Residual Frequency', 'Residual Phase', 'Signal Density', 'Noise Density']
+    unit_list = ['Hz', 'rad', 'dB', 'dB']
 
 file_path = file_dir + file_name
 data = np.loadtxt(file_path)
-# data = data[8000:,:] # for HhHhsignum113pll_Ts.dat
-time = data[:, 0]
-var = data[:, 1:]
+time = np.linspace(0, len(data), len(data))
+slt_indices = np.arange(500,len(data))
+time = time[slt_indices]
+var = data[slt_indices, 1:]
 if file_type == 2:
     time = data[:, 1]
     var = data[:, 2:]
@@ -63,6 +69,8 @@ def linear_detrend(phase_sequence, time, title):
     return detrended_sequence
 
 def quadratic_detrend(frequency_sequence,time,title):
+    frequency_mean = np.mean(frequency_sequence)
+    frequency_sequence[np.abs(frequency_sequence-frequency_mean)>2] = 0
     coefficients = np.polyfit(time, frequency_sequence, 2)
     fit_sequence = np.polyval(coefficients, time)
     detrended_sequence = frequency_sequence - fit_sequence
@@ -87,13 +95,19 @@ for i in range(var.shape[1]):
     # eliminate ambiguity for phase sequence
     if file_type == 0 and i == 1:
         signal = eliminate_weekly_ambiguity(signal)
+    elif file_type == 4 and i == 1:
+        signal = eliminate_weekly_ambiguity(signal)
     
     # linear detrend for phase sequence
     if file_type == 3 and (i == 1 or i == 3):
         signal = linear_detrend(signal, time, title)
+    elif file_type == 4 and i == 1:
+        signal = linear_detrend(signal, time, title)
     
     # quadratic detrend for frequency sequence
     if file_type == 3 and (i == 0 or i == 2):
+        signal = quadratic_detrend(signal, time, title)
+    elif file_type == 4 and i == 0:
         signal = quadratic_detrend(signal, time, title)
 
     # calculate FTT
@@ -108,14 +122,14 @@ for i in range(var.shape[1]):
     fft_ps = np.abs(fft_amp)**2 / (n/fs)
 
     # calculate CWT
-    # wavename = 'cmorl1.5-1.0'
-    # num_freq = 50
-    # wave_freq = np.logspace(-4, np.log10(1/(2*dt)), num_freq)
-    # if file_type == 1:
-    #     wave_freq = np.logspace(-1, 0.8*np.log10(1/(2*dt)), num_freq)
-    # scales = 1 / wave_freq
-    # cwtmatr, cwt_freq = pywt.cwt(signal, scales, wavename, 1.0 / dt)
-    # cwt_ps = np.abs(cwtmatr)**2 / (n/fs)
+    wavename = 'cmor'
+    num_freq = 50
+    wave_freq = np.logspace(-4, np.log10(1/(2*dt)), num_freq)
+    if file_type == 1:
+        wave_freq = np.logspace(-1, 0.8*np.log10(1/(2*dt)), num_freq)
+    scales = 1 / wave_freq
+    cwtmatr, cwt_freq = pywt.cwt(signal, scales, wavename, 1.0 / dt)
+    cwt_ps = np.abs(cwtmatr)**2 / (n/fs)
 
     # plot figure
     fig, axes = plt.subplots(2, 2, figsize=(16, 8), gridspec_kw={'height_ratios': [3, 5], 'width_ratios': [5, 4]})
@@ -128,12 +142,12 @@ for i in range(var.shape[1]):
     axes[0, 0].tick_params(direction='in')
     axes[0, 0].set_title('Time Series')
 
-    # # wavelet transform
-    # pcwt = axes[1, 0].pcolormesh(time, cwt_freq, cwt_ps, cmap='jet', norm=LogNorm())
-    # axes[1, 0].set_title('Wavelet Transform')
-    # axes[1, 0].set_ylabel('Frequency [Hz]')
-    # axes[1, 0].set_yscale('log')
-    # cbar = plt.colorbar(pcwt, ax=axes[1, 0], orientation='horizontal', pad=0.1)
+    # wavelet transform
+    pcwt = axes[1, 0].pcolormesh(time, cwt_freq, cwt_ps, cmap='jet', norm=LogNorm())
+    axes[1, 0].set_title('Wavelet Transform')
+    axes[1, 0].set_ylabel('Frequency [Hz]')
+    axes[1, 0].set_yscale('log')
+    cbar = plt.colorbar(pcwt, ax=axes[1, 0], orientation='horizontal', pad=0.1)
     
     # no right-upper subplot
     axes[0, 1].axis('off')

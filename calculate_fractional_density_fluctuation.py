@@ -2,6 +2,26 @@ import numpy as np
 from scipy import integrate
 from numpy.polynomial import Polynomial
 import matplotlib.pyplot as plt
+from astropy import units as u
+from astropy.time import Time
+from astropy.coordinates import get_sun, get_body_barycentric, solar_system_ephemeris
+
+def calculate_solar_offset(time):
+    with solar_system_ephemeris.set('builtin'):
+        sun_position = get_sun(time)
+        earth_position = get_body_barycentric('earth', time)
+        mars_position = get_body_barycentric('mars', time)
+    # calculate vector of Sun to Earth and vector of Mars to Earth
+    vec_S2E = sun_position.cartesian.xyz - earth_position.xyz
+    vec_M2E = mars_position.xyz - earth_position.xyz
+    # calculate including angle between Sun and Mars to Earth
+    angle_SEM = np.arccos(np.dot(vec_S2E, vec_M2E) / (np.linalg.norm(vec_S2E) * np.linalg.norm(vec_M2E)))
+    solar_offset = np.linalg.norm(vec_S2E) * np.sin(angle_SEM)
+    AU = 1.49597871e11
+    solar_radius = 6.955e8
+    solar_offset_Rs = solar_offset.value * AU / solar_radius
+    print('solar_offset: ', round(solar_offset_Rs,3))
+    return solar_offset_Rs
 
 def linear_detrend(phase_sequence, time, title):
     coefficients = np.polyfit(time, phase_sequence, 1)
@@ -16,6 +36,8 @@ def linear_detrend(phase_sequence, time, title):
     return detrended_sequence
 
 def quadratic_detrend(frequency_sequence,time,title):
+    frequency_mean = np.mean(frequency_sequence)
+    frequency_sequence[np.abs(frequency_sequence-frequency_mean)>2] = 0
     coefficients = np.polyfit(time, frequency_sequence, 2)
     fit_sequence = np.polyval(coefficients, time)
     detrended_sequence = frequency_sequence - fit_sequence
@@ -89,75 +111,72 @@ def cal_beta(FF2, freq, nu_a, nu_b):
     plt.show()
     return beta
 
-file_dir = 'E:/Research/Data/Tianwen/m1a04x_PLL/'
-file_name = 'BdBdsignum113pll_Ts.dat'
-var_list = ['Residual Frequency-1', 'Residual Phase-1', 'Residual Frequency-2', 'Residual Phase-2']
-unit_list = ['Hz', 'rad', 'Hz', 'rad']
+file_dir = 'E:/Research/Data/Tianwen/m1a04x_renew/'
+file_name = 'BdBdchan3_1frephase1s.dat'
+var_list = ['Residual Frequency', 'Residual Phase', 'Signal Density', 'Noise Density']
+unit_list = ['Hz', 'rad', 'dB', 'dB']
 
 file_path = file_dir + file_name
 data = np.loadtxt(file_path)
-# data = data[8000:,:] # for HhHhsignum113pll_Ts.dat
-time = data[:, 0]
-var = data[:, 1:]
+time = np.linspace(500, len(data), len(data))
+slt_indices = np.arange(0,len(data))
+time = time[slt_indices]
+var = data[slt_indices, 1:]
 time = time - time[0]
 
 for i in range(var.shape[1]):
-    if i == 1 or i == 3: # not for phase sequence
-        continue
-    signal = var[:, i]
-    var_name = var_list[i] if i < len(var_list) else f'variable {i + 1}'
-    unit_name =  unit_list[i] if i < len(unit_list) else ''
-    title = file_path[24:] + ' --- ' + var_name
-    
-    # linear detrend for phase sequence
-    if i == 1 or i == 3:
-        signal = linear_detrend(signal, time, title)
-    
-    # quadratic detrend for frequency sequence
-    if i == 0 or i == 2:
+    if i == 0: # only for frequency sequence
+        signal = var[:, i]
+        var_name = var_list[i] if i < len(var_list) else f'variable {i + 1}'
+        unit_name =  unit_list[i] if i < len(unit_list) else ''
+        title = file_path[24:] + ' --- ' + var_name
+        
+        # quadratic
         signal = quadratic_detrend(signal, time, title)
 
-    # calculate FTT
-    n = len(time)
-    dt = time[1] - time[0]
-    fs = 1/dt
-    print(round(dt,3))
-    fft_freq = np.fft.fftfreq(n, dt)
-    fft_amp = np.fft.fft(signal)
-    fft_amp = fft_amp[fft_freq > 0]
-    FF2 = np.abs(fft_amp) ** 2 / (n/fs)
-    fft_freq = fft_freq[fft_freq > 0]
-    
-    # calculate spectral index beta
-    nu_Nyq = 1/(2*dt)
-    nu_a = 1e-3
-    nu_b = 0.01 * nu_Nyq
-    beta = cal_beta(FF2, fft_freq, nu_a, nu_b)
-    
-    # calculate scaling frequency factor
-    nu_c = cal_nu_c(beta, nu_a, nu_b)
-    
-    # calcualte fluctuation measure FM
-    freq_band = 8.4e9
-    FM = cal_FM(FF2, freq_band)
-    plt.figure()
-    plt.plot(fft_freq, FM**2)
-    plt.xlabel('Frequency [Hz]')
-    plt.ylabel('Flctuation Measure [' + unit_name +'^2/Hz]')
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.title('Fluctuation Measure PSD')
-    plt.show()
-    
-    # calculate Ne and L_LOS based on models
-    r = 2
-    Ne = cal_Ne(r)
-    L_LOS = cal_L_LOS(r)
+        # calculate FTT
+        n = len(time)
+        dt = time[1] - time[0]
+        fs = 1/dt
+        print(round(dt,3))
+        fft_freq = np.fft.fftfreq(n, dt)
+        fft_amp = np.fft.fft(signal)
+        fft_amp = fft_amp[fft_freq > 0]
+        FF2 = np.abs(fft_amp) ** 2 / (n/fs)
+        fft_freq = fft_freq[fft_freq > 0]
+        
+        # calculate spectral index beta
+        nu_Nyq = 1/(2*dt)
+        nu_a = 1e-3
+        nu_b = 0.1 * nu_Nyq
+        beta = cal_beta(FF2, fft_freq, nu_a, nu_b)
+        
+        # calculate scaling frequency factor
+        nu_c = cal_nu_c(beta, nu_a, nu_b)
+        
+        # calcualte fluctuation measure FM
+        freq_band = 8.4e9
+        FM = cal_FM(FF2, freq_band)
+        plt.figure()
+        plt.plot(fft_freq, FM**2)
+        plt.xlabel('Frequency [Hz]')
+        plt.ylabel('Flctuation Measure [' + unit_name +'^2/Hz]')
+        plt.xscale('log')
+        plt.yscale('log')
+        plt.title('Fluctuation Measure PSD')
+        plt.show()
+        
+        # calculate Ne and L_LOS based on models
+        UTC_time = Time('2021-10-04T12:00:00.00')
+        r = calculate_solar_offset(UTC_time)
+        r = 4.94
+        Ne = cal_Ne(r)
+        L_LOS = cal_L_LOS(r)
 
-    # calculate sigma_FM and sigma_Ne
-    sigma_FM = cal_sigma_FM(FM, fft_freq, nu_a, nu_b)
-    sigma_Ne = cal_sigma_Ne(sigma_FM, nu_c, L_LOS, r)
-    
-    # calculate fractional density fluctuations
-    epsilon = sigma_Ne / Ne
-    print('epsilon: ', round(epsilon,3))
+        # calculate sigma_FM and sigma_Ne
+        sigma_FM = cal_sigma_FM(FM, fft_freq, nu_a, nu_b)
+        sigma_Ne = cal_sigma_Ne(sigma_FM, nu_c, L_LOS, r)
+        
+        # calculate fractional density fluctuations
+        epsilon = sigma_Ne / Ne
+        print('epsilon: ', round(epsilon,3))
