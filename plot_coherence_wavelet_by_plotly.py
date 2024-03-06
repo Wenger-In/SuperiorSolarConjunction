@@ -102,7 +102,7 @@ fig1.update_yaxes(type='log', title='Scale [s]', row=4, col=1)
 fig1.update_xaxes(title_text='Time [s]', row=4, col=1)
 
 fig1.show()
-fig1.write_html(save_dir+'cwt.html')
+# fig1.write_html(save_dir+'cwt.html')
 
 # plotly figures
 fig2 = make_subplots(rows=5, cols=1, shared_xaxes=True, vertical_spacing=0.02)
@@ -127,4 +127,4 @@ fig2.update_yaxes(type='log', title='Scale [s]', row=5, col=1)
 fig2.update_xaxes(title_text='Time [s]', row=5, col=1)
 
 fig2.show()
-fig2.write_html(save_dir+'wtc.html')
+# fig2.write_html(save_dir+'wtc.html')
