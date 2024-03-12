@@ -4,7 +4,8 @@ import pyleoclim as pyleo
 import numpy as np
 from matplotlib.colors import SymLogNorm
 from scipy.stats import zscore
-import mpld3
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 ## function: convert the time data to 'seconds of day'
 def convert_to_second_of_day(time_array):
@@ -59,10 +60,8 @@ if i_case == 1: # 2021/09/30(273), 12:00-13:00, Ht-Sv, Ht-Wz, Sv-Wz, (latitudina
     file_Wz = 'WzWzchan3_1frephase1s.dat'
     file1_name = file_Ht
     file2_name = file_Sv
-    time_beg = '1200'
-    time_end = '1230'
-    sub_beg = convert_to_second_of_day(2021273120000)[0]
-    sub_end = convert_to_second_of_day(2021273123000)[0]
+    time_beg = 2021273120000
+    time_end = 2021273123000
 elif i_case == 2: # 2021/10/04(277), 05:40-08:20, Js-Bd, Bd-Yg, Yg-Hh, (inward propagation, latitudinal fluctuaion, outward propagation)
     file_dir = 'E:/Research/Data/Tianwen/m1a04x_renew/'
     save_dir = 'E:/Research/Work/tianwen_IPS/m1a04x_renew/'
@@ -72,10 +71,8 @@ elif i_case == 2: # 2021/10/04(277), 05:40-08:20, Js-Bd, Bd-Yg, Yg-Hh, (inward p
     file_Hh = 'HhHhchan3_1frephase1s.dat'
     file1_name = file_Yg
     file2_name = file_Hh
-    time_beg = '0530'
-    time_end = '0600'
-    sub_beg = convert_to_second_of_day(2021277053000)[0]
-    sub_end = convert_to_second_of_day(2021277060000)[0]
+    time_beg = 2021277053000
+    time_end = 2021277060000
 elif i_case == 3: # 2021/10/07(280), 03:30-04:00, sh-km, (polar region fluctuation)
     file_dir = 'E:/Research/Data/Tianwen/m1a07x_up/'
     save_dir = 'E:/Research/Work/tianwen_IPS/m1a07x_up/'
@@ -83,10 +80,8 @@ elif i_case == 3: # 2021/10/07(280), 03:30-04:00, sh-km, (polar region fluctuati
     file_km = 'kmkmchan3_1frephase5s.dat'
     file1_name = file_sh
     file2_name = file_km
-    time_beg = '0330'
-    time_end = '0400'
-    sub_beg = convert_to_second_of_day(2021280033000)[0]
-    sub_end = convert_to_second_of_day(2021280040000)[0]
+    time_beg = 2021280033000
+    time_end = 2021280040000
 elif i_case == 4: # 2021/10/15(288), 01:00-04:00, Bd-Hh, Bd-Ys, Hh-Ys, (fine structure)
                   #                  07:40-13:00, Bd-Hh, Bd-Ys, Hh-Ys, (CME)
     file_dir = 'E:/Research/Data/Tianwen/m1a15y_copy/'
@@ -96,11 +91,14 @@ elif i_case == 4: # 2021/10/15(288), 01:00-04:00, Bd-Hh, Bd-Ys, Hh-Ys, (fine str
     file_Ys = 'YsYschan3_1frephase1s.dat'
     file1_name = file_Hh
     file2_name = file_Ys
-    time_beg = '1230'
-    time_end = '1300'
-    sub_beg = convert_to_second_of_day(2021288123000)[0]
-    sub_end = convert_to_second_of_day(2021288130000)[0]
-
+    time_beg = 2021288123000
+    time_end = 2021288130000
+# convert subplot time interval
+str_beg = str(time_beg)[-6:-2]
+str_end = str(time_end)[-6:-2]
+sub_beg = convert_to_second_of_day(time_beg)[0]
+sub_end = convert_to_second_of_day(time_end)[0]
+    
 ## read data
 file1_path = file_dir + file1_name
 file2_path = file_dir + file2_name
@@ -170,55 +168,49 @@ plt.plot(sod2_sub, freq2_sub)
 plt.legend([file1_name[0:2], file2_name[0:2]], loc='upper left')
 
 if save_or_not == 1:
-    plt.savefig(save_dir + file1_name[0:2] + '-' + file2_name[0:2] + '-' + time_beg + '-' + time_end + '-TimeSeries.png')
-    # mpld3.save_html(plt.gcf(), save_dir + file1_name[0:2] + '-' + file2_name[0:2] + '-TimeSeries.html')
+    plt.savefig(save_dir + file1_name[0:2] + '-' + file2_name[0:2] + '-' + str_beg + '-' + str_end + '-TimeSeries.png')
 
 ## figure 3: coherence spectrum between series1 and series2
 coh.plot(figsize=[12,3], signif_thresh=0.9)
 
 if save_or_not == 1:
-    plt.savefig(save_dir + file1_name[0:2] + '-' + file2_name[0:2] + '-' + time_beg + '-' + time_end + '-Coherence.png')
+    plt.savefig(save_dir + file1_name[0:2] + '-' + file2_name[0:2] + '-' + str_beg + '-' + str_end + '-Coherence.png')
 
 ## figure: significance test of coherence spectrum
 # cwt_sig = coh.signif_test(number=3, qs=[.9,.95])
 # cwt_sig.plot(figsize=[12,3], signif_thresh=0.9)
 
 ## figure 4: phase and time lag spectrum
-plt.figure(figsize=[15,6])
-# phase spectrum
-plt.subplot(2,1,1)
-plt.contour(coh.time, coh.scale, np.flipud(np.rot90(coh.wtc)), levels=3, cmap='YlGn') # coherence contours overlap in graph
-cb11 = plt.colorbar()
-cb11.set_label('WTC')
-plt.pcolor(coh.time, coh.scale, np.flipud(np.rot90(np.degrees(coh.phase))), cmap='RdBu') # phase pcolors as the background
-cb12 = plt.colorbar()
-cb12.set_label('Phase [rad.]')
-plt.plot(coh.time, coh.coi, 'k--') # cone of influence
-plt.xlabel('time [s]')
-plt.ylabel('scale [s]')
-plt.ylim([np.min(coh.scale), np.max(coh.scale)])
-plt.yscale('log')
+fig = make_subplots(rows=3, cols=1, shared_xaxes=True, shared_yaxes=True, vertical_spacing=0.02)
+# coherence spectrum
+fig.add_trace(go.Contour(x=coh.time, y=coh.scale, z=np.flipud(np.rot90(coh.wtc)),
+                         colorscale='magma', colorbar_title_text='Coherence', colorbar_y=0.7, colorbar_len=0.2), 
+              row=1, col=1)
+fig.add_trace(go.Scatter(x=coh.time, y=coh.coi, mode='lines', line=dict(dash='dash')), row=1, col=1)
+fig.update_yaxes(range=[np.log10(np.min(coh.scale)), np.log10(np.max(coh.scale))], type='log', title='Scale [s]', row=1, col=1)
 # time lag spectrum
-plt.subplot(2,1,2)
-plt.contour(coh.time, coh.scale, np.flipud(np.rot90(coh.wtc)), levels=3,
-            cmap='YlGn', norm=SymLogNorm(linthresh=1)) # coherence contours overlap in graph
-cb21 = plt.colorbar()
-cb21.set_label('WTC')
-plt.pcolor(coh.time, coh.scale, np.flipud(np.rot90(coh.phase/2/np.pi/coh.frequency[np.newaxis,:])), 
-               cmap='RdBu', norm=SymLogNorm(linthresh=1))  # time lag pcolors as the background
-cb22 = plt.colorbar()
-cb22.set_label('lag [s]')
-plt.plot(coh.time, coh.coi, 'k--') # cone of influence
-plt.xlabel('time [s]')
-plt.ylabel('scale [s]')
-plt.ylim([np.min(coh.scale), np.max(coh.scale)])
-plt.yscale('log')
+fig.add_trace(go.Contour(x=coh.time, y=coh.scale, z=np.flipud(np.rot90(coh.phase/2/np.pi/coh.frequency[np.newaxis,:])), 
+                         colorscale='RdBu', colorbar_title_text='Lag [s]', colorbar_y=0.4, colorbar_len=0.2), 
+              row=2, col=1)
+fig.add_trace(go.Scatter(x=coh.time, y=coh.coi, mode='lines', line=dict(dash='dash')), row=2, col=1)
+fig.update_yaxes(range=[np.log10(np.min(coh.scale)), np.log10(np.max(coh.scale))], type='log', title='Scale [s]', row=2, col=1)
+# time lag and coherence together
+fig.add_trace(go.Contour(x=coh.time, y=coh.scale, z=np.flipud(np.rot90(coh.wtc)),
+                         colorscale='magma', colorbar_title_text='Coherence', colorbar_y=0.1, colorbar_len=0.2), 
+              row=3, col=1)
+fig.add_trace(go.Heatmap(x=coh.time, y=coh.scale, z=np.flipud(np.rot90(coh.phase/2/np.pi/coh.frequency[np.newaxis,:])), 
+                         colorscale='RdBu', colorbar_title_text='Lag [s]', colorbar_y=0.4, colorbar_len=0.2), 
+              row=3, col=1)
+fig.add_trace(go.Scatter(x=coh.time, y=coh.coi, mode='lines', line=dict(dash='dash')), row=3, col=1)
+fig.update_yaxes(range=[np.log10(np.min(coh.scale)), np.log10(np.max(coh.scale))], type='log', title='Scale [s]', row=3, col=1)
+fig.update_xaxes(title_text='Time [s]', row=3, col=1)
 
-plt.suptitle(file2_name[0:2] + ' relative to ' + file1_name[0:2] + '-Freq [Hz]')
+fig.update_layout(title={'text': file2_name[0:2] + ' relative to ' + file1_name[0:2] + '-Freq [Hz]','x': 0.5, 'y': 0.95})
 
 if save_or_not == 1:
-    plt.savefig(save_dir + file1_name[0:2] + '-' + file2_name[0:2] + '-' + time_beg + '-' + time_end + '-PhaseLag.png')
+    fig.write_html(save_dir + file1_name[0:2] + '-' + file2_name[0:2] + '-' + str_beg + '-' + str_end + '-PhaseLag.html')
 
 plt.show()
+fig.show()
 
 db
