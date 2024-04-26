@@ -3,98 +3,81 @@ import pandas as pd
 import pyleoclim as pyleo
 import numpy as np
 from matplotlib.colors import SymLogNorm
-from scipy.stats import zscore
-from scipy.interpolate import interp1d, CubicSpline
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import sys
+import statistics
 
-## function: convert the time data to 'seconds of day'
-def convert_to_second_of_day(time_array):
-    if isinstance(time_array, int):
-        time_array = [time_array]
-    sod_array = []
-    for time in time_array:
-        year = time // 1000000000
-        doy = (time % 1000000000) // 1000000
-        hour = (time % 1000000) // 10000
-        minute = (time % 10000) // 100
-        second = time % 100
-        sod = hour * 3600 + minute * 60 + second
-        sod_array.append(sod)
-    return np.array(sod_array)
-
-## function: eliminate outliers with deviation > threshold*std_error
-def eliminate_outliers(freq, time, threshold):
-    freq_zscore = zscore(freq)
-    outliers = np.abs(freq_zscore) > threshold
-    outliers[0] = False
-    outliers[-1] = False # retain beginning/end data for interpolation
-    freq = freq[~outliers]
-    time = time[~outliers]
-    return freq, time
-
-# function: interpolate frequency time series
-def interpolate(freq, time, time_std, method='linear'):
-    if method == 'linear':
-        f = interp1d(time, freq)
-    elif method == 'quad':
-        f = interp1d(time, freq, kind='quadratic')
-    elif method == 'cubic':
-        f = CubicSpline(time, freq)
-    freq_std = f(time_std)
-    return freq_std
-
-## function: detrend frequency time series and plot it
-def detrend(freq, time, order):
-    coef = np.polyfit(time, freq, order)
-    freq_fit = np.polyval(coef, time)
-    freq_detrended = freq - freq_fit
-    return freq_fit, freq_detrended
+sys.path.append(r'E:/Research/Program/SuperiorSolarConjunction')
+import frequency_analyse_utils
+from frequency_analyse_utils import convert_to_second_of_day, convert_to_HHMM, \
+    eliminate_outliers, interpolate, detrend
 
 ## import data
 i_case = 4
-save_or_not = 0
+save_or_not = 1
 if i_case == 1: # 2021/09/30(273), 12:00-13:00, Ht-Sv, Ht-Wz, Sv-Wz, (latitudinal fluctuaion)
-    file_dir = 'E:/Research/Data/Tianwen/m1930x_up_new/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/m1930x_up_new/'
+    file_dir = 'E:/Research/Data/Tianwen/m1930x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1930x/'
     file_Ht = 'HtHtchan3_1frephase1s.dat'
     file_Sv = 'SvSvchan3_1frephase1s.dat'
     file_Wz = 'WzWzchan3_1frephase1s.dat'
-    file1_name = file_Ht
-    file2_name = file_Sv
-    time_beg = 2021273120000
-    time_end = 2021273123000
-elif i_case == 2: # 2021/10/04(277), 05:40-08:20, Js-Bd, Bd-Yg, Yg-Hh, (inward propagation, latitudinal fluctuaion, outward propagation)
+    file1_name = file_Sv
+    file2_name = file_Wz
+    time_beg = 2021273123000
+    time_end = 2021273130000
+elif i_case == 2: # 2021/10/03(276), 09:30-10:00, Ht, Wz, Zc, (latitudinal fluctuaion)
+    file_dir = 'E:/Research/Data/Tianwen/m1a03x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1a03x/'
+    file_Ht = 'HtHtchan3_1frephase1s.dat'
+    file_Wz = 'WzWzchan3_1frephase1s.dat'
+    file_Zc = 'ZcZcchan3_1frephase1s.dat'
+    file1_name = file_Wz
+    file2_name = file_Zc
+    time_beg = 2021273093000
+    time_end = 2021273100000
+elif i_case == 3: # 2021/10/04(277), 05:40-08:20, Js-Bd, Bd-Yg, Yg-Hh, (inward propagation, latitudinal fluctuaion, outward propagation)
     file_dir = 'E:/Research/Data/Tianwen/m1a04x_renew/'
     save_dir = 'E:/Research/Work/tianwen_IPS/m1a04x_renew/'
     file_Js = 'JsJschan3_1frephase1s.dat' # time has been formatted as 'seconds of day'
     file_Bd = 'BdBdchan3_1frephase1s.dat'
-    file_Yg = 'YgYgchan3_1frephase2s.dat'
+    file_Yg = 'YgYgchan3_1frephase4s.dat'
     file_Hh = 'HhHhchan3_1frephase1s.dat'
     file1_name = file_Yg
     file2_name = file_Hh
     time_beg = 2021277080000
     time_end = 2021277083000
-elif i_case == 3: # 2021/10/07(280), 03:30-04:00, sh-km, (polar region fluctuation)
-    file_dir = 'E:/Research/Data/Tianwen/m1a07x_up/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/m1a07x_up/'
+elif i_case == 4: # 2021/10/07(280), 03:30-04:00, sh-km, (polar region fluctuation)
+    file_dir = 'E:/Research/Data/Tianwen/m1a07x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1a07x/'
     file_sh = 'shshchan3_1frephase5s.dat'
     file_km = 'kmkmchan3_1frephase5s.dat'
     file1_name = file_sh
     file2_name = file_km
-    time_beg = 2021280033000
-    time_end = 2021280040000
-elif i_case == 4: # 2021/10/15(288), 01:00-04:00, Bd-Hh, Bd-Ys, Hh-Ys, (fine structure)
-                  #                  07:40-13:00, Bd-Hh, Bd-Ys, Hh-Ys, (CME)
-    file_dir = 'E:/Research/Data/Tianwen/m1a15y_copy/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/m1a15y_copy/'
+    time_beg = 2021280041500
+    time_end = 2021280044500
+elif i_case == 5: # 2021/10/15(288), 01:00-04:00, hb, sh, km, (fine structure)
+    file_dir = 'E:/Research/Data/Tianwen/m1a15x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1a15x/'
+    file_hb = 'hbhbchan3_1frephase5s.dat'
+    file_ke = 'kekesignum111frephase5s.dat'
+    file_sh = 'shshchan3_1frephase1s.dat'
+    file_km = 'kmkmchan3_1frephase1s.dat'
+    file1_name = file_sh
+    file2_name = file_km
+    time_beg = 2021288024500
+    time_end = 2021288031500
+elif i_case == 6: # 2021/10/15(288), 07:40-13:00, Bd-Ys, Bd-Hh, Ys-Hh, Js-Bd, Js-Ys, Js-Hh, (CME)
+    file_dir = 'E:/Research/Data/Tianwen/m1a15y/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1a15y/'
     file_Bd = 'BdBdchan3_1frephase1s.dat'
-    file_Hh = 'HhHhchan3_1frephase1s.dat'
     file_Ys = 'YsYschan3_1frephase1s.dat'
-    file1_name = file_Hh
-    file2_name = file_Ys
-    time_beg = 2021288123000
-    time_end = 2021288130000
+    file_Hh = 'HhHhchan3_1frephase1s.dat'
+    file_Js = 'JsJschan3_1frephase1s.dat'
+    file1_name = file_Ys
+    file2_name = file_Hh
+    time_beg = 2021288110000
+    time_end = 2021288112200
 # convert subplot time interval
 str_beg = str(time_beg)[-6:-2]
 str_end = str(time_end)[-6:-2]
@@ -114,6 +97,8 @@ sod1 = convert_to_second_of_day(time1)
 sod2 = convert_to_second_of_day(time2)
 if file1_name == 'JsJschan3_1frephase1s.dat':
     sod1 = time1 # time has been formatted as 'seconds of day'
+if i_case == 6 and file2_name == 'HhHhchan3_1frephase1s.dat':
+    sod2 = time2 # time has been formatted as 'seconds of day'
 freq1 = data1[:,1]
 freq2 = data2[:,1]
 
@@ -126,10 +111,16 @@ sod2_sub = sod2[ind2_sub]
 freq1_sub = freq1[ind1_sub]
 freq2_sub = freq2[ind2_sub]
 
+# ## calculate standard deviation
+std_dev1 = statistics.stdev(freq1_sub)
+std_dev2 = statistics.stdev(freq2_sub)
+print("std_dev_1=", std_dev1)
+print("std_dev_2=", std_dev2)
+
 ## frequency series preprocess
 # step 1: eliminate outliers
-freq1_out, sod1_out = eliminate_outliers(freq1_sub, sod1_sub, 2)
-freq2_out, sod2_out = eliminate_outliers(freq2_sub, sod2_sub, 2)
+freq1_out, sod1_out = eliminate_outliers(freq1_sub, sod1_sub, 10) #3
+freq2_out, sod2_out = eliminate_outliers(freq2_sub, sod2_sub, 10) #3
 # step 2: detrend for frequency sequence
 freq1_fit, freq1_detrend = detrend(freq1_out, sod1_out, 3)
 freq1_fit, freq2_detrend = detrend(freq2_out, sod2_out, 3)
@@ -145,14 +136,14 @@ series2 = pyleo.Series(time=sod2_sub, value=freq2_interp, \
 
 # ## transform analysis
 # # Fourier transform
-# fft1 = series1.spectral(method='wwz')
-# fft2 = series2.spectral(method='wwz')
+# fft1 = series1.spectral(method='cwt')
+# fft2 = series2.spectral(method='cwt')
 # # wavelet transform
-# cwt1 = series1.wavelet(method='wwz')
-# cwt2 = series2.wavelet(method='wwz')
+# cwt1 = series1.wavelet(method='cwt')
+# cwt2 = series2.wavelet(method='cwt')
 
 ## wavelet coherence analysis
-coh = series2.wavelet_coherence(series1, method='wwz')
+coh = series2.wavelet_coherence(series1, method='cwt')
 coh.wtc[coh.wtc>1] = np.nan
 time_lag = np.flipud(np.rot90(coh.phase/2/np.pi/coh.frequency[np.newaxis,:]))
 scale_range = [np.log10(np.min(coh.scale)), np.log10(np.max(coh.scale))]
@@ -170,24 +161,36 @@ fig.add_trace(go.Contour(x=coh.time, y=coh.scale, z=np.flipud(np.rot90(coh.wtc))
     colorscale='magma', colorbar_title_text='Coherence', colorbar_y=0.5, colorbar_len=0.2), \
         row=2, col=1)
 fig.add_trace(go.Heatmap(x=coh.time, y=coh.scale, z=time_lag, \
-    colorscale='RdBu', colorbar_title_text='Lag [s]', colorbar_y=0.1, colorbar_len=0.2), \
-        row=2, col=1)
+    colorscale='RdBu', zmin=-np.max(np.abs(time_lag)), zmax=np.max(np.abs(time_lag)), \
+        colorbar_title_text='Lag [s]', colorbar_y=0.1, colorbar_len=0.3), \
+            row=2, col=1)
 # plot cone of influence
-fig.add_trace(go.Scatter(x=coh.time, y=coh.coi, mode='lines', line=dict(dash='dash')), row=2, col=1)
+fig.add_trace(go.Scatter(x=coh.time, y=coh.coi, mode='lines', line=dict(dash='dash'), name='coi'), \
+    row=2, col=1)
 fig.update_yaxes(range=scale_range, type='log', title='Scale [s]', row=2, col=1)
 
 # panel 3: time lag spectrum
 fig.add_trace(go.Contour(x=coh.time, y=coh.scale, z=time_lag, \
-    colorscale='RdBu', colorbar_title_text='Lag [s]', colorbar_y=0.1, colorbar_len=0.2), \
-        row=3, col=1)
-fig.add_trace(go.Scatter(x=coh.time, y=coh.coi, mode='lines', line=dict(dash='dash')), row=3, col=1)
+    colorscale='RdBu', zmin=-np.max(np.abs(time_lag)), zmax=np.max(np.abs(time_lag)), \
+        colorbar_title_text='Lag [s]', colorbar_y=0.1, colorbar_len=0.3), \
+            row=3, col=1)
+# plot cone of influence
+fig.add_trace(go.Scatter(x=coh.time, y=coh.coi, mode='lines', line=dict(dash='dash'), name='coi'), \
+    row=3, col=1)
 fig.update_yaxes(range=scale_range, type='log', title='Scale [s]', row=3, col=1)
 
 # figure layout
-fig.update_xaxes(title_text='Time [s]', row=3, col=1)
-fig.update_layout(title={'text': file2_name[0:2] + ' relative to ' + file1_name[0:2] + '-Freq [Hz]','x': 0.5, 'y': 0.95})
+xposs = [0, 1/6, 2/6, 3/6, 4/6, 5/6, 1]
+xticks = [int(xpos*(sod_end-sod_beg)+sod_beg) for xpos in xposs]
+xlabels = [convert_to_HHMM(xtick) for xtick in xticks]
+fig.update_xaxes(title_text='Time [HHMM]', tickvals=xticks, ticktext=xlabels, row=3, col=1)
+fig.update_layout(title={'text': file2_name[0:2] + ' relative to ' + file1_name[0:2] + ' on ' + file_dir[25:-1], \
+    'x': 0.5, 'y': 0.95})
 
 if save_or_not == 1:
     fig.write_html(save_dir + file1_name[0:2] + '-' + file2_name[0:2] + '-' + str_beg + '-' + str_end + '-Summary.html')
+    # fig.write_image(save_dir + file1_name[0:2] + '-' + file2_name[0:2] + '-' + str_beg + '-' + str_end + '-Summary.png')
+else:
+    fig.show()
 
-fig.show()
+# db
