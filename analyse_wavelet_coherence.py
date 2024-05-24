@@ -14,8 +14,8 @@ from frequency_analyse_utils import convert_to_second_of_day, convert_to_HHMM, \
     eliminate_outliers, interpolate, detrend
 
 ## import data
-i_case = 4
-save_or_not = 1
+i_case = 6
+save_or_not = 0
 if i_case == 1: # 2021/09/30(273), 12:00-13:00, Ht-Sv, Ht-Wz, Sv-Wz, (latitudinal fluctuaion)
     file_dir = 'E:/Research/Data/Tianwen/m1930x/'
     save_dir = 'E:/Research/Work/tianwen_IPS/m1930x/'
@@ -111,22 +111,22 @@ sod2_sub = sod2[ind2_sub]
 freq1_sub = freq1[ind1_sub]
 freq2_sub = freq2[ind2_sub]
 
-# ## calculate standard deviation
-std_dev1 = statistics.stdev(freq1_sub)
-std_dev2 = statistics.stdev(freq2_sub)
-print("std_dev_1=", std_dev1)
-print("std_dev_2=", std_dev2)
-
 ## frequency series preprocess
 # step 1: eliminate outliers
 freq1_out, sod1_out = eliminate_outliers(freq1_sub, sod1_sub, 10) #3
 freq2_out, sod2_out = eliminate_outliers(freq2_sub, sod2_sub, 10) #3
 # step 2: detrend for frequency sequence
-freq1_fit, freq1_detrend = detrend(freq1_out, sod1_out, 3)
-freq1_fit, freq2_detrend = detrend(freq2_out, sod2_out, 3)
+freq1_fit, freq1_detrend = detrend(freq1_out, sod1_out, 5)
+freq1_fit, freq2_detrend = detrend(freq2_out, sod2_out, 5)
 # step 3: interpolation for frequency sequence
 freq1_interp = interpolate(freq1_detrend, sod1_out, sod1_sub)
 freq2_interp = interpolate(freq2_detrend, sod2_out, sod2_sub)
+
+# ## calculate standard deviation
+std_dev1 = statistics.stdev(freq1_interp)
+std_dev2 = statistics.stdev(freq2_interp)
+print("std_dev_1=", std_dev1)
+print("std_dev_2=", std_dev2)
 
 ## construct pyleo.series         
 series1 = pyleo.Series(time=sod1_sub, value=freq1_interp, \
