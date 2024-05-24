@@ -17,9 +17,9 @@ from frequency_analyse_utils import convert_to_second_of_day, convert_to_HHMM, \
     eliminate_outliers, interpolate, detrend, log_linear_fit
 
 ## import data
-i_case = 4
+i_case = 2
 save_or_not = 0
-period_lb, period_ub = 19, 27
+period_lb, period_ub = 5, 9
 if i_case == 1: # 2021/09/30(273), 12:00-13:00, Ht-Sv, Ht-Wz, Sv-Wz, (latitudinal fluctuaion)
     file_dir = 'E:/Research/Data/Tianwen/m1930x/'
     save_dir = 'E:/Research/Work/tianwen_IPS/m1930x/'
@@ -28,8 +28,8 @@ if i_case == 1: # 2021/09/30(273), 12:00-13:00, Ht-Sv, Ht-Wz, Sv-Wz, (latitudina
     file_Wz = 'WzWzchan3_1frephase1s.dat'
     file1_name = file_Sv
     file2_name = file_Wz
-    time_beg = 2021273123000
-    time_end = 2021273130000
+    time_beg = 2021273121500
+    time_end = 2021273124500
 elif i_case == 2: # 2021/10/03(276), 09:30-10:00, Ht, Wz, Zc, (latitudinal fluctuaion)
     file_dir = 'E:/Research/Data/Tianwen/m1a03x/'
     save_dir = 'E:/Research/Work/tianwen_IPS/m1a03x/'
@@ -47,8 +47,8 @@ elif i_case == 3: # 2021/10/04(277), 05:40-08:20, Js-Bd, Bd-Yg, Yg-Hh, (inward p
     file_Bd = 'BdBdchan3_1frephase1s.dat'
     file_Yg = 'YgYgchan3_1frephase4s.dat'
     file_Hh = 'HhHhchan3_1frephase1s.dat'
-    file1_name = file_Yg
-    file2_name = file_Hh
+    file1_name = file_Js
+    file2_name = file_Bd
     time_beg = 2021277080000
     time_end = 2021277083000
 elif i_case == 4: # 2021/10/07(280), 03:30-04:00, sh-km, (polar region fluctuation)
@@ -98,7 +98,7 @@ time1 = data1[:, 0]
 time2 = data2[:, 0]
 sod1 = convert_to_second_of_day(time1)
 sod2 = convert_to_second_of_day(time2)
-if i_case == 2 and file1_name == 'JsJschan3_1frephase1s.dat':
+if i_case == 3 and file1_name == 'JsJschan3_1frephase1s.dat':
     sod1 = time1 # time has been formatted as 'seconds of day'
 freq1 = data1[:,1]
 freq2 = data2[:,1]
