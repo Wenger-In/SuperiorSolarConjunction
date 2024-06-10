@@ -14,8 +14,8 @@ from frequency_analyse_utils import convert_to_second_of_day, convert_to_HHMM, \
     eliminate_outliers, interpolate, detrend
 
 ## import data
-i_case = 6
-save_or_not = 0
+i_case = 3
+save_or_not = 1
 if i_case == 1: # 2021/09/30(273), 12:00-13:00, Ht-Sv, Ht-Wz, Sv-Wz, (latitudinal fluctuaion)
     file_dir = 'E:/Research/Data/Tianwen/m1930x/'
     save_dir = 'E:/Research/Work/tianwen_IPS/m1930x/'
@@ -42,11 +42,11 @@ elif i_case == 3: # 2021/10/04(277), 05:40-08:20, Js-Bd, Bd-Yg, Yg-Hh, (inward p
     file_Js = 'JsJschan3_1frephase1s.dat' # time has been formatted as 'seconds of day'
     file_Bd = 'BdBdchan3_1frephase1s.dat'
     file_Yg = 'YgYgchan3_1frephase4s.dat'
-    file_Hh = 'HhHhchan3_1frephase1s.dat'
+    file_Hh = 'HhHhchan3_1frephase4s.dat' # 'HhHhchan3_1frephase1s.dat'
     file1_name = file_Yg
     file2_name = file_Hh
-    time_beg = 2021277080000
-    time_end = 2021277083000
+    time_beg = 2021277064100
+    time_end = 2021277065500
 elif i_case == 4: # 2021/10/07(280), 03:30-04:00, sh-km, (polar region fluctuation)
     file_dir = 'E:/Research/Data/Tianwen/m1a07x/'
     save_dir = 'E:/Research/Work/tianwen_IPS/m1a07x/'
@@ -188,7 +188,7 @@ fig.update_layout(title={'text': file2_name[0:2] + ' relative to ' + file1_name[
     'x': 0.5, 'y': 0.95})
 
 if save_or_not == 1:
-    fig.write_html(save_dir + file1_name[0:2] + '-' + file2_name[0:2] + '-' + str_beg + '-' + str_end + '-Summary.html')
+    fig.write_html(save_dir + file1_name[0:2] + '-' + file2_name[0:2] + '-' + str_beg + '-' + str_end + '-4s-Summary.html')
     # fig.write_image(save_dir + file1_name[0:2] + '-' + file2_name[0:2] + '-' + str_beg + '-' + str_end + '-Summary.png')
 else:
     fig.show()
