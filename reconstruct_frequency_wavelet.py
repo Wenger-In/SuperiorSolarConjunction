@@ -17,9 +17,9 @@ from frequency_analyse_utils import convert_to_second_of_day, convert_to_HHMM, \
     eliminate_outliers, interpolate, detrend, log_linear_fit
 
 ## import data
-i_case = 2
+i_case = 3
 save_or_not = 0
-period_lb, period_ub = 5, 9
+period_lb, period_ub = 50, 120
 if i_case == 1: # 2021/09/30(273), 12:00-13:00, Ht-Sv, Ht-Wz, Sv-Wz, (latitudinal fluctuaion)
     file_dir = 'E:/Research/Data/Tianwen/m1930x/'
     save_dir = 'E:/Research/Work/tianwen_IPS/m1930x/'
@@ -46,9 +46,9 @@ elif i_case == 3: # 2021/10/04(277), 05:40-08:20, Js-Bd, Bd-Yg, Yg-Hh, (inward p
     file_Js = 'JsJschan3_1frephase1s.dat' # time has been formatted as 'seconds of day'
     file_Bd = 'BdBdchan3_1frephase1s.dat'
     file_Yg = 'YgYgchan3_1frephase4s.dat'
-    file_Hh = 'HhHhchan3_1frephase1s.dat'
-    file1_name = file_Js
-    file2_name = file_Bd
+    file_Hh = 'HhHhchan3_1frephase4s.dat'
+    file1_name = file_Yg
+    file2_name = file_Hh
     time_beg = 2021277080000
     time_end = 2021277083000
 elif i_case == 4: # 2021/10/07(280), 03:30-04:00, sh-km, (polar region fluctuation)
