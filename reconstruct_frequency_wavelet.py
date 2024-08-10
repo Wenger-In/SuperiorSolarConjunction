@@ -19,7 +19,7 @@ from frequency_analyse_utils import convert_to_second_of_day, convert_to_HHMM, \
 ## import data
 i_case = 3
 save_or_not = 0
-period_lb, period_ub = 50, 120
+period_lb, period_ub = 400, 700
 if i_case == 1: # 2021/09/30(273), 12:00-13:00, Ht-Sv, Ht-Wz, Sv-Wz, (latitudinal fluctuaion)
     file_dir = 'E:/Research/Data/Tianwen/m1930x/'
     save_dir = 'E:/Research/Work/tianwen_IPS/m1930x/'
@@ -47,10 +47,10 @@ elif i_case == 3: # 2021/10/04(277), 05:40-08:20, Js-Bd, Bd-Yg, Yg-Hh, (inward p
     file_Bd = 'BdBdchan3_1frephase1s.dat'
     file_Yg = 'YgYgchan3_1frephase4s.dat'
     file_Hh = 'HhHhchan3_1frephase4s.dat'
-    file1_name = file_Yg
-    file2_name = file_Hh
-    time_beg = 2021277080000
-    time_end = 2021277083000
+    file1_name = file_Js
+    file2_name = file_Bd
+    time_beg = 2021277070900
+    time_end = 2021277082000
 elif i_case == 4: # 2021/10/07(280), 03:30-04:00, sh-km, (polar region fluctuation)
     file_dir = 'E:/Research/Data/Tianwen/m1a07x/'
     save_dir = 'E:/Research/Work/tianwen_IPS/m1a07x/'
@@ -117,7 +117,7 @@ freq2_sub = freq2[ind2_sub]
 freq1_out, sod1_out = eliminate_outliers(freq1_sub, sod1_sub, 10)
 freq2_out, sod2_out = eliminate_outliers(freq2_sub, sod2_sub, 10)
 # step 2: detrend for frequency sequence
-freq1_fit, freq1_detrend = detrend(freq1_out, sod1_out, 3)
+freq1_fit, freq1_detrend = detrend(freq1_out, sod1_out, 5) #3
 freq1_fit, freq2_detrend = detrend(freq2_out, sod2_out, 3)
 # step 3: interpolation for frequency sequence
 freq1_interp = interpolate(freq1_detrend, sod1_out, sod1_sub)
@@ -128,6 +128,10 @@ series1 = pyleo.Series(time=sod1_sub, value=freq1_interp, \
     time_name='Time', time_unit='s', value_name = 'Freq', value_unit='Hz', label=file1_name[0:2])
 series2 = pyleo.Series(time=sod2_sub, value=freq2_interp, \
     time_name='Time', time_unit='s', value_name = 'Freq', value_unit='Hz', label=file2_name[0:2])
+
+## lowpass filter cutoff at 0.1 Hz
+series1 = series1.filter(cutoff_freq=0.1)
+series2 = series2.filter(cutoff_freq=0.1)
 
 # wavelet transform
 time1_vect, period1_vect, WaveletObj_arr1, WaveletCoeff_arr1, sub_wave_arr1 = \
