@@ -17,13 +17,13 @@ from frequency_analyse_utils import convert_to_second_of_day, convert_to_HHMM, \
     eliminate_outliers, interpolate, detrend, log_linear_fit
 
 ## Selecting station pair and time interval
-i_case = 8
-period_lb, period_ub = 420, 500
-save_or_not = 0
+i_case = 18
+period_lb, period_ub = 60, 80
+save_or_not = 1
 ########## Case 01-19 are 2021 Conjunction ##########
 if i_case == 1: # 2021/09/15(258), 02:00-04:00, sh-ur
     file_dir = 'E:/Research/Data/Tianwen/m1915x/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/m1915x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1915x/recon/'
     file_sh = 'shshchan3_1frephase1s.dat' # 00:00-04:00, 1s
     file_ur = 'ururchan3_1frephase1s.dat' # 01:08-04:00, 1s
     file1_name = file_sh
@@ -32,7 +32,7 @@ if i_case == 1: # 2021/09/15(258), 02:00-04:00, sh-ur
     time_end = 2021258040000
 elif i_case == 2: # 2021/09/16(259), 12:00-14:00, Ht-Ys
     file_dir = 'E:/Research/Data/Tianwen/m1916x/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/m1916x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1916x/recon/'
     file_Ht = 'HtHtchan3_1frephase1s.dat' # 12:00-14:00, 1s/2s
     file_Ys = 'YsYschan3_1frephase1s.dat' # 12:00-14:00, 1s/2s
     file1_name = file_Ht
@@ -41,7 +41,7 @@ elif i_case == 2: # 2021/09/16(259), 12:00-14:00, Ht-Ys
     time_end = 2021259130800
 elif i_case == 3: # 2021/09/23(266), 05:15-08:15, Ht-km, Ht-ur, km-ur
     file_dir = 'E:/Research/Data/Tianwen/m1923x/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/m1923x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1923x/recon/'
     file_Ht = 'HtHtchan3_1frephase2s.dat' # 05:15-08:15, 1s/2s
     file_km = 'kmkmchan3_1frephase1s.dat' # 05:15-08:15, 1s/2s
     file_ur = 'ururchan3_1frephase1s.dat' # 05:15-08:15, 1s/2s
@@ -51,7 +51,7 @@ elif i_case == 3: # 2021/09/23(266), 05:15-08:15, Ht-km, Ht-ur, km-ur
     time_end = 2021266054500
 elif i_case == 4: # 2021/09/26(269), 02:30-06:10, sh-ur
     file_dir = 'E:/Research/Data/Tianwen/m1926x/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/m1926x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1926x/recon/'
     file_sh = 'shshchan3frephase.dat' # 02:30-06:10, 5s
     file_ur = 'ururchan3frephase.dat' # 02:30-06:10, 5s
     file1_name = file_sh
@@ -60,7 +60,7 @@ elif i_case == 4: # 2021/09/26(269), 02:30-06:10, sh-ur
     time_end = 2021269061000
 elif i_case == 5: # 2021/09/29(272), 05:00-09:00, Js-ur
     file_dir = 'E:/Research/Data/Tianwen/m1929x/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/m1929x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1929x/recon/'
     file_Js = 'JSfreq.dat'                # 08:00-08:10, 1s, time has been formatted as 'sod', put as file1
     file_ur = 'ururchan3_1frephase1s.dat' # 05:00-09:00, 1s
     file1_name = file_Js
@@ -69,7 +69,7 @@ elif i_case == 5: # 2021/09/29(272), 05:00-09:00, Js-ur
     time_end = 2021272083000
 elif i_case == 6: # 2021/09/30(273), 09:00-14:20(12:00-13:00), Ht-Sv, Ht-Wz, Sv-Wz, (latitudinal fluctuaion)
     file_dir = 'E:/Research/Data/Tianwen/m1930x/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/m1930x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1930x/recon/'
     file_Ht = 'HtHtchan3_1frephase1s.dat' # 09:00-14:20, 1s/2s/5s
     file_Sv = 'SvSvchan3_1frephase1s.dat' # 09:00-14:20, 1s/2s/5s
     file_Wz = 'WzWzchan3_1frephase1s.dat' # 12:20-14:20, 1s/2s/5s
@@ -79,48 +79,48 @@ elif i_case == 6: # 2021/09/30(273), 09:00-14:20(12:00-13:00), Ht-Sv, Ht-Wz, Sv-
     time_end = 2021273141200
 elif i_case == 7: # 2021/10/01(274), 04:40-07:20, sh-km, sh-Ks, km-Ks
     file_dir = 'E:/Research/Data/Tianwen/m1a01x_up/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/m1a01x_up/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1a01x_up/recon/'
     file_sh = 'shshchan3frephase1s.dat' # 04:40-08:00, 1s
     file_km = 'kmkmchan3frephase1s.dat' # 04:40-08:00, 1s
     file_Ks = 'KSfreq.dat'              # 06:58-09:00, 1s, time has been formatted as 'sod', put as file1
-    file1_name = file_km
-    file2_name = file_Ks
-    time_beg = 2021274070000
-    time_end = 2021274073000
+    file1_name = file_sh
+    file2_name = file_km
+    time_beg = 2021274071500
+    time_end = 2021274074500
 elif i_case == 8: # 2021/10/03(276), 09:00-13:40(09:30-10:00), Ht-Wz, Ht-Zc, Wz-Zc, (latitudinal fluctuaion)
     file_dir = 'E:/Research/Data/Tianwen/m1a03x/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/m1a03x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1a03x/recon/'
     file_Ht = 'HtHtchan3_1frephase1s.dat' # 09:00-13:40, 1s
     file_Wz = 'WzWzchan3_1frephase1s.dat' # 09:00-13:40, 1s
     file_Zc = 'ZcZcchan3_1frephase1s.dat' # 09:00-13:40, 1s
-    file1_name = file_Wz
-    file2_name = file_Zc
-    time_beg = 2021276100000
-    time_end = 2021276103000
+    file1_name = file_Ht
+    file2_name = file_Wz
+    time_beg = 2021276090000
+    time_end = 2021276093000
 elif i_case == 9: # 2021/10/04(277), 05:40-08:20, Js-Bd, Bd-Yg(4s), Yg-Hh(4s); Bd-Hh, Js-Hh, Js-Yg(4s), (inward propagation, latitudinal fluctuaion)
     file_dir = 'E:/Research/Data/Tianwen/m1a04x_renew/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/m1a04x_renew/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1a04x_renew/recon/'
     file_Js = 'JsJschan3_1frephase1s.dat' # 07:00-09:00, 1s, time has been formatted as 'sod', put as file1
     file_Bd = 'BdBdchan3_1frephase1s.dat' # 05:40-08:20, 1s/2s/4s
     file_Yg = 'YgYgchan3_1frephase4s.dat' # 05:40-08:20, 4s
     file_Hh = 'HhHhchan3_1frephase1s.dat' # 05:43-08:20, 1s/2s/4s
-    file1_name = file_Js
-    file2_name = file_Yg
+    file1_name = file_Bd
+    file2_name = file_Hh
     time_beg = 2021277070000
     time_end = 2021277073000
 elif i_case == 10: # 2021/10/05(278), 09:50-12:20, Hh-Mc, Hh-Ys, Mc-Ys
     file_dir = 'E:/Research/Data/Tianwen/m1a05x/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/m1a05x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1a05x/recon/'
     file_Hh = 'HhHhchan3_1frephase1s.dat' # 09:50-12:20, 1s
     file_Mc = 'McMcchan3_1frephase1s.dat' # 09:50-12:20, 1s
     file_Ys = 'YsYschan3_1frephase1s.dat' # 09:50-12:20, 1s
-    file1_name = file_Mc
-    file2_name = file_Ys
-    time_beg = 2021278114500
-    time_end = 2021278121500
+    file1_name = file_Hh
+    file2_name = file_Mc
+    time_beg = 2021278111500
+    time_end = 2021278114500
 elif i_case == 11: # 2021/10/07(280), 03:30-05:30(03:30-04:00), sh-km, (polar region fluctuation)
     file_dir = 'E:/Research/Data/Tianwen/m1a07x/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/m1a07x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1a07x/recon/'
     file_sh = 'shshchan3_1frephase5s.dat' # 02:30-08:00, 1s/2s/5s
     file_km = 'kmkmchan3_1frephase5s.dat' # 03:38-09:02, 1s/2s/5s
     file1_name = file_sh
@@ -129,17 +129,17 @@ elif i_case == 11: # 2021/10/07(280), 03:30-05:30(03:30-04:00), sh-km, (polar re
     time_end = 2021280040000
 elif i_case == 12: # 2021/10/12(285), 09:50-11:00, Ht-Wz, Ht-Ys, Wz-Ys
     file_dir = 'E:/Research/Data/Tianwen/m1a12x/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/m1a12x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1a12x/recon/'
     file_Ht = 'HtHtchan3_1frephase1s.dat' # 09:50-11:00, 1s
     file_Wz = 'WzWzchan3_1frephase1s.dat' # 09:50-14:00, 1s
     file_Ys = 'YsYschan3_1frephase1s.dat' # 09:50-11:00, 1s
-    file1_name = file_Wz
-    file2_name = file_Ys
-    time_beg = 2021285103000
-    time_end = 2021285110000
+    file1_name = file_Ht
+    file2_name = file_Wz
+    time_beg = 2021285094500
+    time_end = 2021285101500
 elif i_case == 13: # 2021/10/15(288), 01:00-04:00, sh-km, (fine structure)
     file_dir = 'E:/Research/Data/Tianwen/m1a15x/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/m1a15x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1a15x/recon/'
     file_hb = 'hbhbchan3_1frephase5s.dat' # 00:00-03:59, 5s
     file_sh = 'shshchan3_1frephase1s.dat' # 01:00-04:00, 1s/5s
     file_km = 'kmkmchan3_1frephase1s.dat' # 01:00-04:00, 1s/5s
@@ -149,40 +149,40 @@ elif i_case == 13: # 2021/10/15(288), 01:00-04:00, sh-km, (fine structure)
     time_end = 2021288031500
 elif i_case == 14: # 2021/10/15(288), 07:40-13:00, Bd-Ys, Bd-Hh, Ys-Hh, Js-Bd, Js-Ys, Js-Hh, (CME)
     file_dir = 'E:/Research/Data/Tianwen/m1a15y/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/m1a15y/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1a15y/recon/'
     file_Bd = 'BdBdchan3_1frephase1s.dat' # 07:40-09:10, 1s
     file_Ys = 'YsYschan3_1frephase1s.dat' # 07:40-13:00, 1s
     file_Hh = 'HhHhchan3_1frephase1s.dat' # 07:40-13:00, 1s, time has been formatted as 'sod', put as file2
     file_Js = 'JsJschan3_1frephase1s.dat' # 07:00-09:00, 1s, time has been formatted as 'sod', put as file1
-    file1_name = file_Ys
+    file1_name = file_Bd
     file2_name = file_Hh
-    time_beg = 2021288112700
-    time_end = 2021288114500
+    time_beg = 2021288080000
+    time_end = 2021288082000
 elif i_case == 15: # 2021/10/18(291), 07:40-09:10, Bd-Zc, Hh-Ks, Hh-Ys, Hh-Zc, Ys-Zc, Zc-Ks; Bd-Hh, Bd-Ys, Bd-Ks, Ys-Ks
     file_dir = 'E:/Research/Data/Tianwen/m1a18x/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/m1a18x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1a18x/recon/'
     file_Bd = 'BdBdchan3_1frephase1s.dat' # 04:50-08:55, 1s/2s
     file_Hh = 'HhHhchan3_1frephase1s.dat' # 06:30-09:10, 1s/2s
     file_Ks = 'KsKschan3_1frephase1s.dat' # 01:40-11:00, 1s, time has been formatted as 'sod', put as file2
     file_Ys = 'YsYschan3_1frephase1s.dat' # 07:40-09:10, 1s/2s
     file_Zc = 'ZcZcchan3_1frephase1s.dat' # 06:30-09:10, 1s/2s
     file1_name = file_Ys
-    file2_name = file_Ks
-    time_beg = 2021291084500
-    time_end = 2021291091500
+    file2_name = file_Zc
+    time_beg = 2021291080000
+    time_end = 2021291083000
 elif i_case == 16: # 2021/10/19(292), 03:00-08:00, sh-km, sh-ur, km-ur; 9min data-7min gap-9min data-7min gap-...
     file_dir = 'E:/Research/Data/Tianwen/s1a19x/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/s1a19x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/s1a19x/recon/'
     file_sh = 'shshchan3_1frephase.dat' # 03:00-07:57, 0.01s, time has been formatted as 'sod'
     file_km = 'kmkmchan3_1frephase.dat' # 03:00-07:57, 0.01s, time has been formatted as 'sod'
     file_ur = 'ururchan3_1frephase.dat' # 03:00-07:57, 0.01s, time has been formatted as 'sod'
-    file1_name = file_sh
+    file1_name = file_km
     file2_name = file_ur
-    time_beg = 2021292030000
-    time_end = 2021292031000
+    time_beg = 2021292033300
+    time_end = 2021292034200
 elif i_case == 17: # 2021/10/20(293), 01:30-08:00, sh-km, sh-ur, km-ur; 14min-16min-16min-16min-...
     file_dir = 'E:/Research/Data/Tianwen/s1a20x/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/s1a20x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/s1a20x/recon/'
     file_sh = 'shshchan3_1frephase.dat' # 01:30-08:00, 0.01s, time has been formatted as 'sod'
     file_km = 'kmkmchan3_1frephase.dat' # 01:30-05:40, 0.01s, time has been formatted as 'sod'
     file_ur = 'ururchan3_1frephase.dat' # 01:30-08:00, 0.01s, time has been formatted as 'sod'
@@ -192,17 +192,17 @@ elif i_case == 17: # 2021/10/20(293), 01:30-08:00, sh-km, sh-ur, km-ur; 14min-16
     time_end = 2021293054400
 elif i_case == 18: # 2021/10/23(296), 03:30-06:30, sh-km, sh-ur, km-ur; gap point(035600.5, 041329.5)
     file_dir = 'E:/Research/Data/Tianwen/m1a23x/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/m1a23x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m1a23x/recon/'
     file_sh = 'shshchan5_1frephase1s.dat' # 03:42-06:30, 1s
     file_km = 'kmkmchan5_1frephase1s.dat' # 03:43-06:30, 1s
     file_ur = 'ururchan5_1frephase1s.dat' # 03:45-06:30, 1s
-    file1_name = file_km
+    file1_name = file_sh
     file2_name = file_ur
-    time_beg = 2021296060000
-    time_end = 2021296063000
+    time_beg = 2021296054500
+    time_end = 2021296061500
 elif i_case == 19: # 2021/10/26(299), 04:40-08:00, sh-km, sh-ur, km-ur; 14min-16min-16min-16min-...
     file_dir = 'E:/Research/Data/Tianwen/s1a26x/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/s1a26x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/s1a26x/recon/'
     file_sh = 'shshchan3_1frephase.dat' # 04:40-08:00, 0.01s, time has been formatted as 'sod'
     file_km = 'kmkmchan3_1frephase.dat' # 04:40-08:00, 0.01s, time has been formatted as 'sod'
     file_ur = 'ururchan3_1frephase.dat' # 04:40-08:00, 0.01s, time has been formatted as 'sod'
@@ -213,7 +213,7 @@ elif i_case == 19: # 2021/10/26(299), 04:40-08:00, sh-km, sh-ur, km-ur; 14min-16
 ########## Case 20-22 are 2023 Conjunction ##########
 elif i_case == 20: # 2023/10/28(301), Ht, S6, Sv
     file_dir = 'E:/Research/Data/Tianwen/m3a28x/'
-    save_dir = 'E:/Research/Work/tianwen_IPS/m3a28x/'
+    save_dir = 'E:/Research/Work/tianwen_IPS/m3a28x/recon/'
     file_Ht = 'HTHTsignum113frephase1s.dat' # 04:00-09:00, 1s/2s/5s
     file_S6 = 'S6S6signum113frephase1s.dat' # 04:00-09:00, 1s
     file_Sv = 'SVSVsignum113frephase1s.dat' # 07:50-09:00, 1s/2s/5s
@@ -312,6 +312,8 @@ elif sod1[1] - sod1[0] == 5:
 else:
     series1 = series1.interp().filter(cutoff_freq=0.1)
     series2 = series2.interp().filter(cutoff_freq=0.1)
+sod1_sub = series1.time
+sod2_sub = series2.time
 freq1_interp = series1.value
 freq2_interp = series2.value
 
@@ -373,6 +375,9 @@ xlabels = [convert_to_HHMM(xtick) for xtick in xticks]
 fig.update_xaxes(title_text='Time [HHMM]', tickvals=xticks, ticktext=xlabels, row=3, col=1)
 fig.update_layout(title={'text': 'Wavelet Reconstruction on '+file_dir[25:-1],'x': 0.5, 'y': 0.95})
 
-fig.show()
+if save_or_not == 1:
+    fig.write_html(save_dir + file1_name[0:2] + '-' + file2_name[0:2] + '-' + str_beg + '-' + str_end + '-Reconstruct.html')
+else:
+    fig.show()
 
 # db
