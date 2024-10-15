@@ -13,7 +13,7 @@ from frequency_analyse_utils import convert_to_second_of_day, convert_to_HHMM, \
     eliminate_outliers, interpolate, detrend
 
 ## Selecting station pair and time interval
-i_case = 17
+i_case = 9
 save_or_not = 1
 ########## Case 01-19 are 2021 Conjunction ##########
 if i_case == 1: # 2021/09/15(258), 02:00-04:00, sh-ur
@@ -37,7 +37,7 @@ elif i_case == 2: # 2021/09/16(259), 12:00-14:00, Ht-Ys
 elif i_case == 3: # 2021/09/23(266), 05:15-08:15, Ht-km, Ht-ur, km-ur
     file_dir = 'E:/Research/Data/Tianwen/m1923x/'
     save_dir = 'E:/Research/Work/tianwen_IPS/m1923x/'
-    file_Ht = 'HtHtchan3_1frephase2s.dat' # 05:15-08:15, 1s/2s
+    file_Ht = 'HtHtchan3_1frephase2s.dat' # 05:15-08:15, 2s
     file_km = 'kmkmchan3_1frephase1s.dat' # 05:15-08:15, 1s/2s
     file_ur = 'ururchan3_1frephase1s.dat' # 05:15-08:15, 1s/2s
     file1_name = file_Ht
@@ -100,9 +100,9 @@ elif i_case == 9: # 2021/10/04(277), 05:40-08:20, Js-Bd, Bd-Yg(4s), Yg-Hh(4s); B
     file_Yg = 'YgYgchan3_1frephase4s.dat' # 05:40-08:20, 4s
     file_Hh = 'HhHhchan3_1frephase1s.dat' # 05:43-08:20, 1s/2s/4s
     file1_name = file_Js
-    file2_name = file_Yg
-    time_beg = 2021277070000
-    time_end = 2021277073000
+    file2_name = file_Bd
+    time_beg = 2021277080000
+    time_end = 2021277083000
 elif i_case == 10: # 2021/10/05(278), 09:50-12:20, Hh-Mc, Hh-Ys, Mc-Ys
     file_dir = 'E:/Research/Data/Tianwen/m1a05x/'
     save_dir = 'E:/Research/Work/tianwen_IPS/m1a05x/'
