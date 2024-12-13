@@ -17,8 +17,8 @@ from frequency_analyse_utils import convert_to_second_of_day, convert_to_HHMM, \
     eliminate_outliers, interpolate, detrend, log_linear_fit
 
 ## Selecting station pair and time interval
-i_case = 18
-period_lb, period_ub = 60, 80
+i_case = 9
+period_lb, period_ub = 100, 300
 save_or_not = 1
 ########## Case 01-19 are 2021 Conjunction ##########
 if i_case == 1: # 2021/09/15(258), 02:00-04:00, sh-ur
@@ -104,10 +104,10 @@ elif i_case == 9: # 2021/10/04(277), 05:40-08:20, Js-Bd, Bd-Yg(4s), Yg-Hh(4s); B
     file_Bd = 'BdBdchan3_1frephase1s.dat' # 05:40-08:20, 1s/2s/4s
     file_Yg = 'YgYgchan3_1frephase4s.dat' # 05:40-08:20, 4s
     file_Hh = 'HhHhchan3_1frephase1s.dat' # 05:43-08:20, 1s/2s/4s
-    file1_name = file_Bd
-    file2_name = file_Hh
-    time_beg = 2021277070000
-    time_end = 2021277073000
+    file1_name = file_Js
+    file2_name = file_Bd
+    time_beg = 2021277080000
+    time_end = 2021277082000
 elif i_case == 10: # 2021/10/05(278), 09:50-12:20, Hh-Mc, Hh-Ys, Mc-Ys
     file_dir = 'E:/Research/Data/Tianwen/m1a05x/'
     save_dir = 'E:/Research/Work/tianwen_IPS/m1a05x/recon/'
