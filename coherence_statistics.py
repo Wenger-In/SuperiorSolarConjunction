@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
+import matplotlib as mpl
 
 # Importing data
 file_dir = 'E:/Research/Work/tianwen_IPS/'
@@ -35,7 +36,7 @@ scale_qr, vel_qr = scale[ind_qr], vel_sign[ind_qr]
 # Inclined bin
 ind_ic = np.where((acute_angle > bins[1]) & (acute_angle < bins[2]))
 scale_ic, vel_ic = scale[ind_ic], vel_sign[ind_ic]
-# Quasi-tangential bin
+# Quasi-latitudinal bin
 ind_qt = np.where((acute_angle > bins[2]) & (acute_angle < bins[3]))
 scale_qt, vel_qt = scale[ind_qt], vel_sign[ind_qt]
 
@@ -45,7 +46,11 @@ num_inward = np.sum(np.array(vel_qr) < 0)
 outward_perc = num_outward / (num_outward + num_inward)# 87.9%
 
 # Plotting quasi-radial velocity distribution
-plt.figure(figsize=(10, 4))
+mpl.rcParams['font.family'] = 'Helvetica'
+mpl.rcParams['font.size'] = 18
+plt.figure(figsize=(18 / 2.54, plt.rcParams['figure.figsize'][1]))
+# plt.figure(figsize=(14, 6))
+# plt.rcParams['font.size'] = 16
 
 # Binning velocity every 50km/s, scale every 20s
 plt.hist2d(vel_qr, scale_qr, bins=[72, 40], range=[[-1800, 1800], [0, 800]], cmap='jet')
@@ -56,8 +61,12 @@ plt.xlabel('$v_{proj}$ (km/s)')
 plt.ylabel('Scale (s)')
 plt.title('Along quasi-radial baselines')
 
-# Plotting inclined and quasi-tangential velocity distribution
-plt.figure(figsize=(10, 4))
+# Plotting inclined and quasi-latitudinal velocity distribution
+mpl.rcParams['font.family'] = 'Helvetica'
+mpl.rcParams['font.size'] = 18
+plt.figure(figsize=(18 / 2.54, plt.rcParams['figure.figsize'][1]))
+# plt.figure(figsize=(12, 5))
+# plt.rcParams['font.size'] = 13
 
 # Binning velocity every 50km/s, scale every 20s
 plt.subplot(1,2,1)
@@ -76,7 +85,7 @@ cb_qt.set_ticks([0,1,2,3])
 plt.xlim([0, 1500])
 plt.xlabel('|$v_{proj}$| (km/s)')
 plt.ylabel('Scale (s)')
-plt.title('Along quasi-tangential baselines')
+plt.title('Along quasi-latitudinal baselines')
 
 plt.show()
 
